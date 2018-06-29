@@ -4,7 +4,7 @@ import spacy as spacy
 import gensim
 
 
-
+import time
 
 class MySentences(object):
 
@@ -17,17 +17,26 @@ class MySentences(object):
     # an iterative solution can also work here: go into every directory
 
 
+    def getSize(self):
+        count = 1647305 # as of June 27
+        # for filename in glob.iglob(os.path.join(self.dirname, "**", "*.txt"), recursive=True):
+        #     count+=1
+        return count
 
     def __iter__(self):
         count = 0
+        t0 = time.time()
         for filename in glob.iglob(os.path.join(self.dirname, "**", "*.txt"), recursive=True):
-
             with open(filename) as file:
                 for line in file:
                     yield gensim.utils.simple_preprocess(line)
 
             if count %1000 == 0:
+
+                t1 = time.time()
                 print ("done %d docs" % count)
+                print ("took %s time" % (t1 - t0))
+                t0 = time.time()
 
             count+=1
 
@@ -38,14 +47,28 @@ class MySentences(object):
         #     for line in open(os.path.join(self.dirname, fname)):
         #         yield line.split()
 
-if __name__ == "__main__":
-
-
+def train_vectors():
     sentences = MySentences("../pubmed_data/unzipped/")
 
-    model = gensim.models.Word2Vec(sentences, size=300, workers=16)
-    print(model.wv.index2word[0], model.wv.index2word[1], model.wv.index2word[2])
-    print (model.wv['the'])
+    print("size was %d" % sentences.getSize())
+
+    model = gensim.models.Word2Vec(sentences, size=300, workers=8)
+    model.save('./tmp/draft_model')
+    return model
+    # print(model.wv.index2word[0], model.wv.index2word[1], model.wv.index2word[2])
+    # print (model.wv['the'])
+
+
+def load_vectors():
+    return gensim.models.Word2Vec.load("./tmp/draft_model")
+
+
+if __name__ == "__main__":
+
+    t0 = time.time()
+    model = load_vectors()
+    print("took %s time to load" % (time.time()-t0))
+    print(model.most_similar("diabetes", topn=100))
+
     # model.train()
 
-    model.save('./tmp/draft_model')
