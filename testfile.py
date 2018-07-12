@@ -68,7 +68,14 @@ if __name__ == "__main__":
     t0 = time.time()
     model = load_vectors()
     print("took %s time to load" % (time.time()-t0))
-    print(model.most_similar("diabetes", topn=100))
+    similar_dict = model.most_similar("diabetes", topn=100)
+    print(similar_dict)
+
+    with open("topn_nicely.txt") as file:
+        for key in similar_dict:
+            file.write(key + "\n")
+            # print key
+
 
     # model.train()
 
