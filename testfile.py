@@ -52,6 +52,7 @@ def train_vectors():
 
     print("size was %d" % sentences.getSize())
 
+    # by default, min count is already 5
     model = gensim.models.Word2Vec(sentences, size=300, workers=8)
     model.save('./tmp/draft_model')
     return model
@@ -71,7 +72,7 @@ if __name__ == "__main__":
     similar_dict = model.most_similar("diabetes", topn=100)
     print(similar_dict)
 
-    with open("topn_nicely.txt") as file:
+    with open("topn_nicely.txt", "w") as file:
         for key in similar_dict:
             file.write(key + "\n")
             # print key
