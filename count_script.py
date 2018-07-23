@@ -18,17 +18,29 @@ t0 = time.time()
 DIRNAME = "../pubmed_data/unzipped/"
 TYPOS = ["diabets", "diabeties", "diabeted", "abetes", "daibetes", "betes", "diabetesb", "diaetes", "diabates"]
 TYPOS_DICT = defaultdict(int)
+TYPOS_LISTING_COUNT = {}
 
 count = 0
 
 
-for filename in glob.iglob(os.path.join(DIRNAME, "**", "*.txt"), recursive=True):
+for filename in glob.iglob(os.path.join(DIRNAME, "**", "*.nxml"), recursive=True):
     with open(filename) as file:
         for line in file:
             list_tokens = gensim.utils.simple_preprocess(line) # returns a list of tokens
             for token in list_tokens:
                 if token in TYPOS:
                     TYPOS_DICT[token] += 1
+                    print("hit found typo %s in %s".format(token, filename))
+                    if (token in TYPOS_LISTING_COUNT):
+                        if filename in TYPOS_LISTING_COUNT[token]:
+                            TYPOS_LISTING_COUNT[token][filename] += 1
+                        else:
+                            TYPOS_LISTING_COUNT[token][filename] = 1
+
+                    else:
+                        TYPOS_LISTING_COUNT[token] = {}
+                        TYPOS_LISTING_COUNT[token][filename] = 1
+
 
 
 
@@ -47,6 +59,10 @@ for filename in glob.iglob(os.path.join(DIRNAME, "**", "*.txt"), recursive=True)
 
 with open("typo_results.txt", "w") as res_file:
     res_file.write(json.dumps(TYPOS_DICT))
+
+with open("typo_listings.txt", "w") as res_file:
+    res_file.write(json.dumps(TYPOS_LISTING_COUNT))
+
 
 
 
